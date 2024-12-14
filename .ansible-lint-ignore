@@ -1,0 +1,2 @@
+
+handlers/main.yml name[casing]  # Allow handler task names only in lower case.

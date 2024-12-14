@@ -1,0 +1,31 @@
+---
+# defaults file for redis
+
+redis_main_instance: disabled_if_instance  # noop, disabled, disabled_if_instance
+
+# redis_instance: NAME
+
+redis_enabled: yes
+redis_state: started
+
+# TODO: Doesn't yet work without errors
+# redis_main_config_lines: #{}
+#   port: 6379
+#   bind: '127.0.0.1'
+#   timeout: $disabled
+#   unknown_test2: $disabled
+
+redis_instance_config_defaults:
+  $include_base: yes
+  port: 0
+  unixsocket: /var/run/redis-##INSTANCE##/redis-server.sock
+  dbfilename: dump-##INSTANCE##.rdb
+  logfile: /var/log/redis/redis-server-##INSTANCE##.log
+  pidfile: /run/redis-##INSTANCE##/redis-server.pid
+
+redis_instance_config: {}
+  # $state: absent  # present, absent
+  # $include_begin: []
+  # $include_end: []
+  # unixsocketperm: 770
+  # timeout: 300

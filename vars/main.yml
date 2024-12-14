@@ -1,0 +1,15 @@
+---
+# vars file for redis
+
+__redis_placeholder_instance: '##INSTANCE##'
+__redis_value_disabled: $disabled
+
+__redis_service: redis-server
+__redis_conf_file: /etc/redis/redis.conf
+
+__redis_base_conf_file: /etc/redis/base.conf
+__redis_instance_service: redis-server@##INSTANCE##
+__redis_instance_conf_file: /etc/redis/redis-##INSTANCE##.conf
+
+__redis_packages:
+  - redis-server

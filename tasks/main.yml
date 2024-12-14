@@ -1,0 +1,33 @@
+---
+
+# Variable configuration
+- name: Include variables tasks.
+  include_tasks: 01_variables.yml
+
+# Setup/install tasks
+- name: Include setup tasks.
+  include_tasks: "10_setup-{{ ansible_os_family }}.yml"
+
+# Configuration
+- name: Include configuration tasks.
+  include_tasks: "20_config.yml"
+
+
+- name: Ensure Redis main instance has selected state and enabled on boot.
+  service:
+    name: "{{ __redis_service }}"
+    state: "{{ 'stopped' if now_disabled else redis_state }}"
+    enabled: "{{ false if now_disabled else redis_enabled }}"
+  vars:
+    now_disabled: "{{ redis_main_instance == 'disabled'  or
+      ( redis_instance is defined  and  redis_main_instance == 'disabled_if_instance' ) }}"
+  when: redis_main_instance != 'noop'
+
+- name: Ensure Redis instance has selected state and enabled on boot.
+  service:
+    name: "{{ __redis_instance_service | replace(__redis_placeholder_instance, redis_instance) }}"
+    state: "{{ 'stopped' if absence else redis_state }}"
+    enabled: "{{ false if absence else redis_enabled }}"
+  vars:
+    absence: "{{ ( _redis_instance_config['$state'] | default('') ) == 'absent' }}"
+  when: redis_instance is defined

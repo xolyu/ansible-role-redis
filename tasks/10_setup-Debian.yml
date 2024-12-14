@@ -1,0 +1,11 @@
+---
+
+- name: Update apt cache if needed.
+  apt:
+    update_cache: true
+    cache_valid_time: "{{ apt_update_cache_valid_time | default(3600) }}"
+
+- name: Ensure Redis packages are installed.
+  apt:
+    name: "{{ redis_packages }}"
+    state: present

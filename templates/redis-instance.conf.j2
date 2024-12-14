@@ -1,0 +1,34 @@
+{{ ansible_managed | comment }}
+{% macro redis_dval(val, list_join=' ') -%}
+{%- if val is boolean %}{{ val | ternary('yes', 'no') }}
+{%- elif val is not string and val is not mapping and val is iterable %}{{ val | join(list_join) }}
+{%- else %}{{ val | string | replace(__redis_placeholder_instance, redis_instance) }}{% endif %}
+{%- endmacro %}
+{% macro redis_directive(name, val) -%}
+{%- if val is not string and val is not mapping and val is iterable %}
+{% for v in val %}
+{{ name }} {{ redis_dval(v) }}
+{% endfor %}
+{%- else %}
+{{ name }} {{ redis_dval(val) }}
+{%- endif %}
+{%- endmacro %}
+
+{% if _conf['$include_base'] | default(false) | bool %}
+include {{ __redis_base_conf_file }}
+{% endif %}
+{% if _conf['$include_begin'] | default([]) | length %}
+{{ redis_directive('include', _conf['$include_begin']) }}
+{% endif %}
+
+{% for k, v in _conf.items() %}
+{% if k is not match('^\$') %}
+{{ redis_directive(k, v) }}
+{% endif %}
+{% endfor %}
+
+{% if _conf['$include_end'] | default([]) | length %}
+{{ redis_directive('include', _conf['$include_end']) }}
+{% endif %}
+
+{# EOF #}

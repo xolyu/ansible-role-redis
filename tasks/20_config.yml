@@ -1,0 +1,51 @@
+---
+
+- name: Create base config by initial copying main config.
+  copy:
+    src: "{{ __redis_conf_file }}"
+    dest: "{{ __redis_base_conf_file }}"
+    remote_src: yes
+    force: no
+    owner: redis
+    group: redis
+    mode: preserve
+
+# TODO: Doesn't yet work without errors
+# - name: Configure Redis main config by lines.
+#   lineinfile:
+#     path: "{{ __redis_conf_file }}"
+#     regexp: >-
+#       {{ '^(?:# )?(' ~ (item.key | regex_escape) ~ ' .*)$' }}
+#     line: >-
+#       {{ '# \1' if is_disabled else (item.key ~ ' ' ~ item.value) }}
+#     backrefs: yes  #"{{ is_disabled }}"
+#   vars:
+#     is_disabled: "{{ item.value == __redis_value_disabled }}"
+#   with_dict: "{{ redis_main_config_lines }}"
+#   when:
+#     - redis_main_config_lines is defined
+#     - redis_main_config_lines | list | length
+#   register: _result_redis_main_config_lines
+# - debug: var=_result_redis_main_config_lines
+
+- name: Template instance config.
+  template:
+    src: redis-instance.conf.j2
+    dest: "{{ _redis_instance_conf_file }}"
+    owner: redis
+    group: redis
+    mode: 0640
+  vars:
+    _conf: "{{ _redis_instance_config }}"
+  when:
+    - redis_instance is defined
+    - ( _redis_instance_config['$state'] | default('') ) != 'absent'
+  notify: restart redis-server
+
+- name: Remove instance config.
+  file:
+    path: "{{ _redis_instance_conf_file }}"
+    state: absent
+  when:
+    - redis_instance is defined
+    - ( _redis_instance_config['$state'] | default('') ) == 'absent'

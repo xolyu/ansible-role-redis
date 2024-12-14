@@ -1,0 +1,8 @@
+---
+# handlers file for redis
+
+- name: restart redis-server
+  service:
+    name: "{{ __redis_instance_service | replace(__redis_placeholder_instance, redis_instance)
+      if redis_instance is defined else __redis_service }}"
+    state: restarted

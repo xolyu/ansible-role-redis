@@ -1,0 +1,12 @@
+---
+
+- name: Define redis_packages.
+  set_fact:
+    redis_packages: "{{ __redis_packages | list }}"
+  when: redis_packages is not defined
+
+- name: Define _redis_instance_config.
+  set_fact:
+    _redis_instance_config: "{{ redis_instance_config_defaults | combine(redis_instance_config) }}"
+    _redis_instance_conf_file: "{{ __redis_instance_conf_file | replace(__redis_placeholder_instance, redis_instance) }}"
+  when: redis_instance is defined
